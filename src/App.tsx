@@ -39,12 +39,13 @@ export default function App() {
     // Renderer
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
-      antialias: true,
+      antialias: window.devicePixelRatio < 2, // Disable antialiasing on high-DPI screens for performance
       alpha: true,
       powerPreference: 'high-performance',
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Cap pixel ratio at 1.5 for mobile performance balance
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
 
@@ -82,7 +83,9 @@ export default function App() {
 
     // 4. Floating Particles
     const particlesGeometry = new THREE.BufferGeometry();
-    const particleCount = 400;
+    // Reduce particle count on mobile
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 150 : 400;
     const posArray = new Float32Array(particleCount * 3);
     
     for(let i = 0; i < particleCount * 3; i++) {
@@ -298,16 +301,16 @@ export default function App() {
         </section>
 
         {/* 2. About Section */}
-        <section id="about" className="min-h-screen w-full flex items-center px-6 md:px-24">
+        <section id="about" className="py-20 md:py-32 w-full flex items-center px-6 md:px-24">
           <div className="section-content max-w-2xl">
-            <div className="flex items-center gap-4 mb-6">
-              <Shield className="text-[#E5FF00]" size={32} />
-              <h3 className="text-xl font-mono text-[#E5FF00]">01 // OUR CORE MISSION</h3>
+            <div className="flex items-center gap-3 mb-4">
+              <Shield className="text-[#E5FF00]" size={24} />
+              <h3 className="text-sm md:text-base font-mono text-[#E5FF00]">01 // OUR CORE MISSION</h3>
             </div>
-            <h2 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
               EMPOWERING INFRASTRUCTURE WITH <span className="text-[#00F0FF]">INTELLIGENT ENERGY.</span>
             </h2>
-            <p className="text-gray-400 text-lg leading-relaxed border-l-2 border-[#00F0FF]/30 pl-6">
+            <p className="text-gray-400 text-sm md:text-base leading-relaxed border-l-2 border-[#00F0FF]/30 pl-4">
               We engineer the central nervous system of your facility. From ultra-efficient high-voltage distribution to adaptive smart-grid logic, we ensure your operations never miss a beat.
             </p>
           </div>
@@ -319,30 +322,30 @@ export default function App() {
         </div>
 
         {/* 4. Commercial Spaces */}
-        <section id="commercial" className="min-h-screen w-full flex items-center justify-center px-6">
-          <div className="section-content w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <section id="commercial" className="py-20 md:py-32 w-full flex items-center justify-center px-6">
+          <div className="section-content w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div className="order-2 md:order-1">
                {/* Placeholder for 3D interaction space */}
-               <div className="h-64 md:h-96 w-full border border-[#E5FF00]/20 rounded-xl relative overflow-hidden group cursor-pointer">
+               <div className="h-48 md:h-80 w-full border border-[#E5FF00]/20 rounded-xl relative overflow-hidden group cursor-pointer">
                   <div className="absolute inset-0 bg-[#E5FF00]/5 group-hover:bg-[#E5FF00]/10 transition-colors duration-500"></div>
-                  <div className="absolute bottom-4 left-4 font-mono text-[#E5FF00] text-xs">
+                  <div className="absolute bottom-4 left-4 font-mono text-[#E5FF00] text-[10px]">
                     STATUS: OPERATIONAL<br/>LOAD: 84%
                   </div>
                </div>
             </div>
             <div className="order-1 md:order-2">
-              <div className="flex items-center gap-4 mb-6">
-                <Activity className="text-[#00F0FF]" size={32} />
-                <h3 className="text-xl font-mono text-[#00F0FF]">03 // ENTERPRISE SOLUTIONS</h3>
+              <div className="flex items-center gap-3 mb-4">
+                <Activity className="text-[#00F0FF]" size={24} />
+                <h3 className="text-sm md:text-base font-mono text-[#00F0FF]">03 // ENTERPRISE SOLUTIONS</h3>
               </div>
-              <h2 className="text-5xl md:text-7xl font-bold mb-8">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">
                 ZERO-DOWNTIME<br/>POWER ARCHITECTURE
               </h2>
-              <p className="text-gray-400 text-lg mb-8">
+              <p className="text-gray-400 text-sm md:text-base mb-6">
                 For data centers, corporate HQs, and retail giants where failure is not an option. We build redundant, fail-safe electrical ecosystems designed for 24/7 reliability.
               </p>
-              <button className="group flex items-center gap-4 px-8 py-4 bg-white/5 border border-white/20 hover:bg-[#00F0FF] hover:text-black hover:border-[#00F0FF] transition-all duration-300 rounded-full font-bold tracking-widest uppercase">
-                SCHEDULE SITE AUDIT <ArrowRight className="group-hover:translate-x-1 transition-transform"/>
+              <button className="group flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/20 hover:bg-[#00F0FF] hover:text-black hover:border-[#00F0FF] transition-all duration-300 rounded-full font-bold tracking-widest uppercase text-xs md:text-sm">
+                SCHEDULE SITE AUDIT <ArrowRight className="group-hover:translate-x-1 transition-transform" size={16}/>
               </button>
             </div>
           </div>
@@ -354,21 +357,21 @@ export default function App() {
         </div>
 
         {/* 6. Industrial */}
-        <section id="industrial" className="min-h-screen w-full flex items-center px-6 md:px-24 bg-black/20 backdrop-blur-sm">
+        <section id="industrial" className="py-20 md:py-32 w-full flex items-center px-6 md:px-24 bg-black/20 backdrop-blur-sm">
           <div className="section-content max-w-3xl">
-             <h3 className="text-xl font-mono text-gray-500 mb-4">04 // HEAVY INDUSTRY</h3>
-             <h2 className="text-6xl md:text-8xl font-black mb-12 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-800">
+             <h3 className="text-sm md:text-base font-mono text-gray-500 mb-4">04 // HEAVY INDUSTRY</h3>
+             <h2 className="text-4xl md:text-6xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-800">
                GIGAWATT-SCALE<br/>ENGINEERING
              </h2>
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { title: '3-PHASE', desc: '480V High-Capacity Distribution' },
                   { title: 'MOTORS', desc: 'Soft Start & VFD Integration' },
                   { title: 'SAFETY', desc: 'Arc Flash Mitigation & Compliance' }
                 ].map((item, i) => (
-                  <div key={i} className="p-6 border-t border-gray-800 hover:border-[#E5FF00] transition-colors group cursor-pointer">
-                    <h4 className="text-2xl font-bold mb-2 group-hover:text-[#E5FF00] transition-colors">{item.title}</h4>
-                    <p className="text-gray-500 font-mono text-sm">{item.desc}</p>
+                  <div key={i} className="p-4 border-t border-gray-800 hover:border-[#E5FF00] transition-colors group cursor-pointer">
+                    <h4 className="text-lg font-bold mb-1 group-hover:text-[#E5FF00] transition-colors">{item.title}</h4>
+                    <p className="text-gray-500 font-mono text-xs">{item.desc}</p>
                   </div>
                 ))}
              </div>
@@ -376,33 +379,33 @@ export default function App() {
         </section>
 
         {/* 7. Smart Lighting */}
-        <section id="lighting" className="min-h-screen w-full flex items-center justify-center px-6 text-center">
-          <div className="section-content max-w-4xl">
-            <h2 className="text-5xl md:text-8xl font-thin mb-8 tracking-tighter">
+        <section id="lighting" className="py-20 md:py-32 w-full flex items-center justify-center px-6 text-center">
+          <div className="section-content max-w-3xl">
+            <h2 className="text-3xl md:text-6xl font-thin mb-6 tracking-tighter">
               HUMAN-CENTRIC <span className="font-bold text-[#00F0FF] glow-text">LIGHTING</span>
             </h2>
-            <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+            <p className="text-gray-300 mb-8 max-w-xl mx-auto text-sm md:text-base">
               Boost productivity and reduce costs with AI-driven lighting systems that adapt to occupancy, daylight, and circadian rhythms.
             </p>
-            <div className="flex justify-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#00F0FF] blur-xl opacity-50 animate-pulse"></div>
-              <div className="w-16 h-16 rounded-full bg-[#E5FF00] blur-xl opacity-50 animate-pulse delay-75"></div>
-              <div className="w-16 h-16 rounded-full bg-white blur-xl opacity-50 animate-pulse delay-150"></div>
+            <div className="flex justify-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-[#00F0FF] blur-xl opacity-50 animate-pulse"></div>
+              <div className="w-12 h-12 rounded-full bg-[#E5FF00] blur-xl opacity-50 animate-pulse delay-75"></div>
+              <div className="w-12 h-12 rounded-full bg-white blur-xl opacity-50 animate-pulse delay-150"></div>
             </div>
           </div>
         </section>
 
         {/* 8. Renewable */}
-        <section id="renewable" className="min-h-screen w-full flex items-center px-6 md:px-24">
+        <section id="renewable" className="py-20 md:py-32 w-full flex items-center px-6 md:px-24">
           <div className="section-content max-w-2xl ml-auto text-right">
-            <h3 className="text-xl font-mono text-[#00F0FF] mb-4">06 // ENERGY INDEPENDENCE</h3>
-            <h2 className="text-5xl md:text-7xl font-bold mb-8">
+            <h3 className="text-sm md:text-base font-mono text-[#00F0FF] mb-4">06 // ENERGY INDEPENDENCE</h3>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
               OFF-GRID<br/>CAPABILITY
             </h2>
-            <p className="text-gray-400 text-lg mb-8">
+            <p className="text-gray-400 text-sm md:text-base mb-6">
               Reduce operational costs and carbon footprint. We integrate industrial-grade solar arrays and battery storage to give you power autonomy.
             </p>
-            <div className="inline-flex flex-col gap-2 items-end font-mono text-xs text-[#00F0FF]">
+            <div className="inline-flex flex-col gap-1 items-end font-mono text-[10px] md:text-xs text-[#00F0FF]">
               <span>PV INPUT: ACTIVE</span>
               <span>GRID STATUS: SYNCED</span>
               <span>BATTERY: 98%</span>
@@ -411,15 +414,15 @@ export default function App() {
         </section>
 
         {/* 9. Safety */}
-        <section id="safety" className="min-h-screen w-full flex items-center justify-center px-6 bg-[#111]/50">
+        <section id="safety" className="py-20 md:py-32 w-full flex items-center justify-center px-6 bg-[#111]/50">
           <div className="section-content text-center">
-            <Shield className="mx-auto text-white mb-8" size={64} />
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 uppercase tracking-widest">
+            <Shield className="mx-auto text-white mb-6" size={48} />
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 uppercase tracking-widest">
               MILITARY-GRADE<br/>COMPLIANCE
             </h2>
-            <div className="flex flex-wrap justify-center gap-4 md:gap-8 mt-8">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-6 mt-6">
               {['ISO 9001', 'NEC 2024', 'OSHA 30', 'LEED GOLD'].map((badge) => (
-                <div key={badge} className="px-6 py-3 border border-white/20 rounded-lg font-mono text-sm hover:bg-white hover:text-black transition-colors cursor-default">
+                <div key={badge} className="px-4 py-2 border border-white/20 rounded-lg font-mono text-xs hover:bg-white hover:text-black transition-colors cursor-default">
                   {badge}
                 </div>
               ))}
@@ -428,22 +431,22 @@ export default function App() {
         </section>
 
         {/* 10. Process */}
-        <section id="process" className="min-h-screen w-full flex items-center px-6 md:px-24">
+        <section id="process" className="py-20 md:py-32 w-full flex items-center px-6 md:px-24">
           <div className="section-content w-full">
-            <h2 className="text-5xl md:text-7xl font-bold mb-16 text-center md:text-left">EXECUTION PROTOCOL</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center md:text-left">EXECUTION PROTOCOL</h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
                 { step: '01', title: 'SURVEY', text: 'Site analysis & load calculation.' },
                 { step: '02', title: 'DESIGN', text: 'CAD schematics & lighting plots.' },
                 { step: '03', title: 'DEPLOY', text: 'Rough-in & precision wiring.' },
                 { step: '04', title: 'ACTIVATE', text: 'Testing, programming & handover.' },
               ].map((item) => (
-                <div key={item.step} className="relative p-8 border-l border-gray-800 hover:border-[#00F0FF] transition-colors group cursor-pointer">
-                  <span className="absolute -left-3 top-8 w-6 h-6 bg-[#050505] border border-gray-800 group-hover:border-[#00F0FF] rounded-full flex items-center justify-center text-[10px] text-gray-500 group-hover:text-[#00F0FF]">
+                <div key={item.step} className="relative p-6 border-l border-gray-800 hover:border-[#00F0FF] transition-colors group cursor-pointer">
+                  <span className="absolute -left-3 top-6 w-6 h-6 bg-[#050505] border border-gray-800 group-hover:border-[#00F0FF] rounded-full flex items-center justify-center text-[10px] text-gray-500 group-hover:text-[#00F0FF]">
                     {item.step}
                   </span>
-                  <h3 className="text-2xl font-bold mb-4 group-hover:text-[#00F0FF] transition-colors">{item.title}</h3>
-                  <p className="text-gray-500 text-sm">{item.text}</p>
+                  <h3 className="text-lg font-bold mb-2 group-hover:text-[#00F0FF] transition-colors">{item.title}</h3>
+                  <p className="text-gray-500 text-xs">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -451,47 +454,47 @@ export default function App() {
         </section>
 
         {/* 11. Contact */}
-        <section id="contact" className="min-h-screen w-full flex items-center justify-center px-6">
-          <div className="section-content w-full max-w-4xl bg-[#111] border border-white/10 p-8 md:p-16 rounded-3xl relative overflow-hidden">
+        <section id="contact" className="py-20 md:py-32 w-full flex items-center justify-center px-6">
+          <div className="section-content w-full max-w-4xl bg-[#111] border border-white/10 p-6 md:p-12 rounded-3xl relative overflow-hidden">
             {/* Decorative elements */}
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#00F0FF] via-[#E5FF00] to-[#00F0FF]"></div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00F0FF] via-[#E5FF00] to-[#00F0FF]"></div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6">START YOUR<br/>PROJECT</h2>
-                <p className="text-gray-400 mb-8">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">START YOUR<br/>PROJECT</h2>
+                <p className="text-gray-400 text-sm mb-6">
                   Ready to upgrade your infrastructure? Dispatch a request to our engineering team.
                 </p>
-                <div className="space-y-4 font-mono text-sm text-gray-300">
-                  <div className="flex items-center gap-4">
-                    <div className="w-2 h-2 bg-[#E5FF00] rounded-full animate-pulse"></div>
+                <div className="space-y-3 font-mono text-xs text-gray-300">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-[#E5FF00] rounded-full animate-pulse"></div>
                     <span>Tirana, Albania HQ</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-2 h-2 bg-[#00F0FF] rounded-full animate-pulse"></div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-[#00F0FF] rounded-full animate-pulse"></div>
                     <span>+355 4 222 3333</span>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                     <span>dispatch@voltaicprime.al</span>
                   </div>
                 </div>
               </div>
 
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                 <div>
-                  <label className="block text-xs font-mono text-[#00F0FF] mb-2 uppercase">Identity</label>
-                  <input type="text" className="w-full bg-black/50 border border-white/20 p-4 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white transition-colors" placeholder="NAME / ORG" />
+                  <label className="block text-[10px] font-mono text-[#00F0FF] mb-1 uppercase">Identity</label>
+                  <input type="text" className="w-full bg-black/50 border border-white/20 p-3 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white text-sm transition-colors" placeholder="NAME / ORG" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-[#00F0FF] mb-2 uppercase">Coordinates</label>
-                  <input type="email" className="w-full bg-black/50 border border-white/20 p-4 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white transition-colors" placeholder="EMAIL ADDRESS" />
+                  <label className="block text-[10px] font-mono text-[#00F0FF] mb-1 uppercase">Coordinates</label>
+                  <input type="email" className="w-full bg-black/50 border border-white/20 p-3 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white text-sm transition-colors" placeholder="EMAIL ADDRESS" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-[#00F0FF] mb-2 uppercase">Transmission</label>
-                  <textarea rows={4} className="w-full bg-black/50 border border-white/20 p-4 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white transition-colors" placeholder="PROJECT DETAILS"></textarea>
+                  <label className="block text-[10px] font-mono text-[#00F0FF] mb-1 uppercase">Transmission</label>
+                  <textarea rows={3} className="w-full bg-black/50 border border-white/20 p-3 rounded-lg focus:outline-none focus:border-[#00F0FF] text-white text-sm transition-colors" placeholder="PROJECT DETAILS"></textarea>
                 </div>
-                <button className="w-full bg-[#00F0FF] text-black font-bold py-4 rounded-lg hover:bg-[#E5FF00] transition-colors uppercase tracking-widest">
+                <button className="w-full bg-[#00F0FF] text-black font-bold py-3 rounded-lg hover:bg-[#E5FF00] transition-colors uppercase tracking-widest text-sm">
                   REQUEST PROPOSAL
                 </button>
               </form>

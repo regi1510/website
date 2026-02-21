@@ -149,7 +149,32 @@ export function ShaderAnimation() {
       renderer.render(scene, camera)
     }
 
-    animate()
+    // Intersection Observer
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!sceneRef.current.animationId) {
+              animate();
+            }
+          } else {
+            if (sceneRef.current.animationId) {
+              cancelAnimationFrame(sceneRef.current.animationId);
+              sceneRef.current.animationId = null;
+            }
+          }
+        });
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(container);
+
+    // Cleanup function needs to handle observer
+    return () => {
+      observer.disconnect();
+      // ... existing cleanup logic handled in main useEffect return
+    };
   }
 
   return (

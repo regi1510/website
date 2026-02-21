@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 // Types for component props
 interface HeroProps {
@@ -23,6 +24,46 @@ interface HeroProps {
   };
   className?: string;
 }
+
+// Magnetic Button Component
+const MagneticButton = ({ children, className, onClick, style }: any) => {
+  const ref = useRef<HTMLButtonElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useSpring(x, { stiffness: 150, damping: 15, mass: 0.1 });
+  const mouseY = useSpring(y, { stiffness: 150, damping: 15, mass: 0.1 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    x.set(middleX * 0.2); 
+    y.set(middleY * 0.2);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.button
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
+      style={{ x: mouseX, y: mouseY, ...style }}
+      className={className}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {children}
+    </motion.button>
+  );
+};
 
 // Reusable Shader Background Hook
 const useShaderBackground = () => {
@@ -299,12 +340,32 @@ void main(){gl_Position=position;}`;
       rendererRef.current.updateShader(defaultShaderSource);
     }
     
-    loop(0);
+    // Intersection Observer to pause animation when off-screen
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!animationFrameRef.current) {
+              loop(performance.now());
+            }
+          } else {
+            if (animationFrameRef.current) {
+              cancelAnimationFrame(animationFrameRef.current);
+              animationFrameRef.current = undefined;
+            }
+          }
+        });
+      },
+      { threshold: 0 }
+    );
+    
+    observer.observe(canvas);
     
     window.addEventListener('resize', resize);
     
     return () => {
       window.removeEventListener('resize', resize);
+      observer.disconnect();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -336,63 +397,63 @@ const Hero: React.FC<HeroProps> = ({
       />
       
       {/* Hero Content Overlay */}
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white pointer-events-none">
         {/* Trust Badge */}
         {trustBadge && (
-          <div className="mb-8 animate-fade-in-down">
-            <div className="flex items-center gap-2 px-6 py-3 bg-orange-500/10 backdrop-blur-md border border-orange-300/30 rounded-full text-sm">
+          <div className="mb-4 md:mb-8 animate-fade-in-down px-4 text-center pointer-events-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-6 md:py-3 bg-[#00F0FF]/10 backdrop-blur-md border border-[#00F0FF]/30 rounded-full text-[10px] md:text-sm">
               {trustBadge.icons && (
-                <div className="flex">
+                <div className="flex gap-1">
                   {trustBadge.icons.map((icon, index) => (
-                    <span key={index} className={`text-${index === 0 ? 'yellow' : index === 1 ? 'orange' : 'amber'}-300`}>
+                    <span key={index} className="text-[#E5FF00]">
                       {icon}
                     </span>
                   ))}
                 </div>
               )}
-              <span className="text-orange-100">{trustBadge.text}</span>
+              <span className="text-[#00F0FF] font-mono tracking-wider">{trustBadge.text}</span>
             </div>
           </div>
         )}
 
-        <div className="text-center space-y-6 max-w-5xl mx-auto px-4">
+        <div className="text-center space-y-3 md:space-y-6 max-w-5xl mx-auto px-4 w-full pointer-events-auto">
           {/* Main Heading with Animation */}
-          <div className="space-y-2">
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter bg-gradient-to-r from-[#00F0FF] via-white to-[#00F0FF] bg-clip-text text-transparent animate-fade-in-up animation-delay-200 drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+          <div className="space-y-0 md:space-y-2">
+            <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter bg-gradient-to-r from-[#00F0FF] via-white to-[#00F0FF] bg-clip-text text-transparent animate-fade-in-up animation-delay-200 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)] md:drop-shadow-[0_0_15px_rgba(0,240,255,0.5)]">
               {headline.line1}
             </h1>
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter bg-gradient-to-r from-[#E5FF00] via-white to-[#E5FF00] bg-clip-text text-transparent animate-fade-in-up animation-delay-400 drop-shadow-[0_0_15px_rgba(229,255,0,0.5)]">
+            <h1 className="text-3xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter bg-gradient-to-r from-[#E5FF00] via-white to-[#E5FF00] bg-clip-text text-transparent animate-fade-in-up animation-delay-400 drop-shadow-[0_0_10px_rgba(229,255,0,0.3)] md:drop-shadow-[0_0_15px_rgba(229,255,0,0.5)]">
               {headline.line2}
             </h1>
           </div>
           
           {/* Subtitle with Animation */}
-          <div className="max-w-3xl mx-auto animate-fade-in-up animation-delay-600">
-            <p className="text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide">
+          <div className="max-w-3xl mx-auto animate-fade-in-up animation-delay-600 px-2">
+            <p className="text-xs sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide max-w-xs sm:max-w-none mx-auto">
               {subtitle}
             </p>
           </div>
           
           {/* CTA Buttons with Animation */}
           {buttons && (
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mt-12 animate-fade-in-up animation-delay-800 pointer-events-auto">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center mt-6 md:mt-12 animate-fade-in-up animation-delay-800 w-full max-w-[280px] sm:max-w-none mx-auto">
               {buttons.primary && (
-                <button 
+                <MagneticButton 
                   onClick={buttons.primary.onClick}
-                  className="px-10 py-5 bg-[#00F0FF] text-black rounded-none font-bold text-lg tracking-widest uppercase transition-all duration-300 hover:bg-[#E5FF00] hover:scale-105 hover:shadow-[0_0_20px_rgba(0,240,255,0.6)] clip-path-slant"
+                  className="px-6 py-3 md:px-10 md:py-5 bg-[#00F0FF] text-black rounded-none font-bold text-sm md:text-lg tracking-widest uppercase transition-all duration-300 hover:bg-[#E5FF00] hover:shadow-[0_0_30px_rgba(0,240,255,0.8),0_0_60px_rgba(0,240,255,0.4)] clip-path-slant w-full sm:w-auto"
                   style={{ clipPath: 'polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%)' }}
                 >
                   {buttons.primary.text}
-                </button>
+                </MagneticButton>
               )}
               {buttons.secondary && (
-                <button 
+                <MagneticButton 
                   onClick={buttons.secondary.onClick}
-                  className="px-10 py-5 bg-transparent border border-[#00F0FF] text-[#00F0FF] rounded-none font-bold text-lg tracking-widest uppercase transition-all duration-300 hover:bg-[#00F0FF]/10 hover:border-[#E5FF00] hover:text-[#E5FF00] backdrop-blur-sm"
+                  className="px-6 py-3 md:px-10 md:py-5 bg-transparent border border-[#00F0FF] text-[#00F0FF] rounded-none font-bold text-sm md:text-lg tracking-widest uppercase transition-all duration-300 hover:bg-[#00F0FF]/10 hover:border-[#E5FF00] hover:text-[#E5FF00] hover:shadow-[0_0_30px_rgba(0,240,255,0.4)] backdrop-blur-sm w-full sm:w-auto"
                   style={{ clipPath: 'polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%)' }}
                 >
                   {buttons.secondary.text}
-                </button>
+                </MagneticButton>
               )}
             </div>
           )}
